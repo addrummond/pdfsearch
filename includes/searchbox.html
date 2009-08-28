@@ -1,0 +1,22 @@
+<form method="get" action="[% query_url %]">
+<table>
+<tr>
+<td><input type="text" name="query" size="40" value="[% HTML.escape(query) %]"></input></td>
+<td class="searchbutton"><input type="submit" value="Search"></input></td>
+</tr>
+<tr>
+<td class="meta" colspan="2"><input type="checkbox" [% IF not meta %]checked="yes"[% END %] name="no_meta" value="1" />&nbsp;Do not retreive metadata
+</td>
+</tr>
+</table>
+</form>
+[% IF display_examples %]
+<p>
+Enter a search query above, for example:
+</p>
+<ul>
+<li><a href="[% query_url %]?query=wh-in-situ">wh-in-situ</a></li>
+<li><a href="[% query_url %]?query=extraposition">extraposition</a></li>
+<li><a href="[% query_url %]?query=%22right%20roof%20constraint%22">"right roof constraint"</a></li>
+</ul>
+[% END %]

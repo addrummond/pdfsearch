@@ -1,0 +1,26 @@
+[% USE HTML %]
+[% js_includes = [ "browser.js" ] %]
+[% subtitle = "browser" %]
+[% INCLUDE header.html %]
+
+<script type="text/javascript">
+var body = document.getElementsByTagName("body")[0];
+
+var xmlhttp = getXMLHttpRequest();
+if (xmlhttp) {
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4) {
+            if (xmlhttp.status == 200) {
+                // Success.
+                var tree = eval(xmlhttp.responseText);
+                body.appendChild(drawSingleLevel(tree));
+            }
+        }
+    }
+
+    xmlhttp.open("GET", "ajax_dirlist.pl", true);
+    xmlhttp.send("");
+}
+</script>
+
+[% INCLUDE footer.html %]

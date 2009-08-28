@@ -1,0 +1,43 @@
+[% USE HTML %]
+[% INCLUDE header.html %]
+
+[% INCLUDE searchbox.html %]
+
+[% default = "&mdash;" %]
+
+[% FOR r = results %] [% notempty = 1 %] [% BREAK %] [% END # What a hack! %]
+[% IF notempty %]
+<h2>Results</h2>
+<ul>
+<li>You can put short phrases in quotes for an exact match.</li>
+<li>PDF metadata such as author, title, etc. is displayed when present.</li>
+<li>Disabling the retreival of metadata speeds up search and allows more than the first 100 results to be displayed.</li>
+<li>Mouse over truncated filenames to see them in full.</li>
+</ul>
+<table class="results">
+<tr>
+<th>filename</th>
+[% IF meta %]
+<th style="width: 10em;">author</th>
+<th style="width: 15em;">title</th>
+<th style="width: 10em;">subject</th>
+<th>no. pages</th>
+[% END %]
+</tr>
+[% FOREACH result = results %]
+<tr>
+<td><a [% IF result.name != result.short_name %]title="[% HTML.escape(result.name) %]"[% END %] href="[% url_prefix | url %][% result.name %]">[% HTML.escape(result.short_name) %]</a></td>
+[% IF meta %]
+<td>[% result.author || default %]</td>
+<td>[% result.title || default %]</td>
+<td>[% result.subject || default %]</td>
+<td>[% result.numpages || default %]</td>
+[% END %]
+</tr>
+[% END %]
+</table>
+[% ELSE %]
+<h2>There were no results for the query &ldquo;[% query %]&rdquo;</h2>
+[% END %]
+
+[% INCLUDE footer.html %]
