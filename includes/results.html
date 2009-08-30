@@ -10,9 +10,9 @@
 <h2>Results</h2>
 <ul>
 <li>You can put short phrases in quotes for an exact match.</li>
+<li>Mouse over filenames to see them in full.</li>
 <li>PDF metadata such as author, title, etc. is displayed when present.</li>
-<li>Disabling the retreival of metadata speeds up search and allows more than the first 100 results to be displayed.</li>
-<li>Mouse over truncated filenames to see them in full.</li>
+<li>Disabling the retreival of metadata leaves room to show filenames in full and allows more than the first 1000 results to be displayed.</li>
 </ul>
 <table class="results">
 <tr>
@@ -26,7 +26,7 @@
 </tr>
 [% FOREACH result = results %]
 <tr>
-<td><a [% IF result.name != result.short_name %]title="[% HTML.escape(result.name) %]"[% END %] href="[% url_prefix | url %][% result.name %]">[% HTML.escape(result.short_name) %]</a></td>
+<td><small><a href="[% url_prefix | url %][% result.dir_url | url %]">[dir]</a></small>&nbsp;<a [% IF result.name != result.short_name %]title="[% HTML.escape(result.name) %]"[% END %] href="[% url_prefix | url %][% result.name | url %]">[% HTML.escape(result.short_name) %]</a></td>
 [% IF meta %]
 <td>[% result.author || default %]</td>
 <td>[% result.title || default %]</td>
