@@ -14,3 +14,4 @@ li.node { cursor:pointer; cursor: hand; }
 li.file { list-style-type: circle; }
 li.dir { list-style-type: square; }
 td.meta { text-align: right; padding-top: 0.5em; }
+small.snippet { color: grey }

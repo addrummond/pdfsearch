@@ -53,7 +53,24 @@ sub parse_qstring {
     return \@words;
 }
 
+sub re_for_strings { 
+    my $strings = shift;
+
+    my @res;
+    for my $string (@$strings) {
+        my $re = "(";
+        for (my $i = 0; $i < length($string); ++$i) {
+            my $c = substr($string, $i, 1);
+            $re .= sprintf("\\x%x", ord($c)); # Saves escaping.
+        }
+        $re .= ")";
+        push @res, $re;
+    }
+
+    return join "|", @res;
+}
+
 @ISA = qw( Exporter Autoloader );
-@EXPORT = qw( parse_qstring );
+@EXPORT = qw( parse_qstring re_for_strings );
 
 1;

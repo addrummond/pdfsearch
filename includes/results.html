@@ -26,7 +26,14 @@
 </tr>
 [% FOREACH result = results %]
 <tr>
-<td><small><a href="[% url_prefix | url %][% result.dir_url | url %]">[dir]</a></small>&nbsp;<a [% IF result.name != result.short_name %]title="[% HTML.escape(result.name) %]"[% END %] href="[% url_prefix | url %][% result.name | url %]">[% HTML.escape(result.short_name) %]</a></td>
+<td><small><a href="[% url_prefix | url %][% result.dir_url | url %]">[dir]</a></small>&nbsp;<a [% IF result.name != result.short_name %]title="[% HTML.escape(result.name) %]"[% END %] href="[% url_prefix | url %][% result.name | url %]">[% HTML.escape(result.short_name) %]</a>
+[% IF result.snippet %]
+<br/>
+<small class="snippet">
+...[% HTML.escape(result.snippet) %]...
+</small>
+[% END %]
+</td>
 [% IF meta %]
 <td>[% result.author || default %]</td>
 <td>[% result.title || default %]</td>
