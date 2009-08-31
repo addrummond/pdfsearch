@@ -69,6 +69,8 @@ for (my $i = 0;
     my $snippet_match = "";
     if ($name && $name =~ /\.pdf$/ && (! $qs_hash->{no_meta})) {
         my $cachefilename = catfile(METADATA_CACHE_DIR, $name) . '.mdcache';
+        my $ocrfilename = catfile(METADATA_CACHE_DIR, $name) . '.ocr';
+      
         if (-f $cachefilename) {
             # Open metadata stored in JSON format in cache (if any).
             my $json;
@@ -87,9 +89,9 @@ for (my $i = 0;
                     $subject = $mdata->{subject};
                 }
             }
-
+        }
+        if (-f $ocrfilename) {
             # Open cached OCR text (if any) to find matching snippet.
-            my $ocrfilename = catfile(METADATA_CACHE_DIR, $name) . '.ocr';
             if ($i < MAX_SNIPPETS && -f $ocrfilename) {
                 my $ocr;
                 eval { 
