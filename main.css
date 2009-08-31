@@ -15,4 +15,5 @@ li.file { list-style-type: circle; }
 li.dir { list-style-type: square; }
 td.meta { text-align: right; padding-top: 0.5em; }
 small.snippet { color: grey }
+small.snippet em { font-style: normal; font-weight: bold; color: black; }
 td.cb:hover { cursor: default; }

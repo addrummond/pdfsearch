@@ -63,7 +63,10 @@ for (my $i = 0;
     my $title = "";
     my $author = "";
     my $subject = "";
-    my $snippet = "";
+    #my $snippet = "";
+    my $snippet_begin = "";
+    my $snippet_end = "";
+    my $snippet_match = "";
     if ($name && $name =~ /\.pdf$/ && (! $qs_hash->{no_meta})) {
         my $cachefilename = catfile(METADATA_CACHE_DIR, $name) . '.mdcache';
         if (-f $cachefilename) {
@@ -96,12 +99,20 @@ for (my $i = 0;
                     close OCR;
                 };
                 if ((! $@) && $ocr) {
-                    if ($ocr =~ m/\s$query_re\s/i) {
+                    if ($ocr =~ m/[^\w]$query_re[^\w]/i) {
+                        $snippet_match = $&;
+
                         use integer; # Integer division.
                         my $start = length($`) - (SNIPPET_LENGTH / 2);
                         $start = 0 if $start < 0;
-                        $snippet = substr($ocr, $start, SNIPPET_LENGTH);
-                        $snippet =~ s/\s+/ /g;
+                        my $middle = length($`) + length($&);
+                        $snippet_begin = substr($ocr, $start, SNIPPET_LENGTH / 2);
+                        $snippet_end = substr($ocr, $middle, SNIPPET_LENGTH / 2);
+                        #$snippet = substr($ocr, $start, SNIPPET_LENGTH);
+                        #$snippet =~ s/\s+/ /g;
+                        $snippet_begin =~ s/\s+/ /g;
+                        $snippet_end =~ s/\s+/ /g;
+                        $snippet_match =~ s/\s+/ /g;
                     }
                 }
             }
@@ -109,7 +120,7 @@ for (my $i = 0;
     }
 
     my ($vol, $dir, $fname) = splitpath($name);
-    push @rlist, { 'url' => $f, 'name' => $name, 'short_name' => $qs_hash->{no_meta} ? $name : trunc($name), 'dir_url' => $dir, 'numpages' => $numpages, 'title' => $title, 'author' => $author, 'subject' => $subject, 'snippet' => $snippet };
+    push @rlist, { 'url' => $f, 'name' => $name, 'short_name' => $qs_hash->{no_meta} ? $name : trunc($name), 'dir_url' => $dir, 'numpages' => $numpages, 'title' => $title, 'author' => $author, 'subject' => $subject, 'snippet_begin' => $snippet_begin, 'snippet_end' => $snippet_end, 'snippet_match' => $snippet_match };
 }
 print $cgi->header(-status => "200 OK", -type => 'text/html', -encoding => 'utf-8');
 $tt->process('results.html', { 'url_prefix' => URL_PREFIX, 'query_url' => QUERY_URL, 'results' => \@rlist, 'query' => $query, 'meta' => ($qs_hash->{no_meta} ? 0 : 1), 'subtitle' => "results for $query" }) || die $tt->error;
