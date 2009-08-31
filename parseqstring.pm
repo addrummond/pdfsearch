@@ -19,7 +19,7 @@ sub parse_qstring {
     my @words;
 
     my $resetvs = sub { # Doing it this way so it closes over outer vars
-        push @words, $currentword if ! $inminus;
+        push @words, $currentword if $currentword && (! $inminus);
         $currentword = "";
     };
 
@@ -48,7 +48,7 @@ sub parse_qstring {
             $currentword .= $c;
         }
     }
-    push @words, $currentword if ! $inminus;
+    push @words, $currentword if $currentword && (! $inminus);
 
     return \@words;
 }
@@ -58,10 +58,15 @@ sub re_for_strings {
 
     my @res;
     for my $string (@$strings) {
-        my $re = "(";
+        my $re = "(?:";
         for (my $i = 0; $i < length($string); ++$i) {
             my $c = substr($string, $i, 1);
-            $re .= sprintf("\\x%x", ord($c)); # Saves escaping.
+            if ($c =~ /\s/) {
+                $re .= "\\s";
+            }
+            else {
+                $re .= sprintf("\\x%x", ord($c)); # Saves escaping.
+            }
         }
         $re .= ")";
         push @res, $re;

@@ -5,11 +5,20 @@
 <td class="searchbutton"><input type="submit" value="Search"></input></td>
 </tr>
 <tr>
-<td class="meta" colspan="2"><input type="checkbox" [% IF not meta %]checked="yes"[% END %] name="no_meta" value="1" />&nbsp;Do not retreive metadata
+<td id="dnrmtd" class="meta cb" colspan="2"><input id="dnrm" type="checkbox" [% IF not meta %]checked="yes"[% END %] name="no_meta" value="1" />&nbsp;Do not retreive metadata
 </td>
 </tr>
 </table>
 </form>
+<script type="text/javascript">
+/* <![CDATA[ */
+var cb = document.getElementById("dnrm");
+var td = document.getElementById("dnrmtd");
+td.onclick = function () {
+    cb.checked = ! cb.checked; 
+}
+/* ]]> */
+</script>
 [% IF display_examples %]
 <p>
 Enter a search query above, for example:

@@ -101,7 +101,7 @@ for (my $i = 0;
                         my $start = length($`) - (SNIPPET_LENGTH / 2);
                         $start = 0 if $start < 0;
                         $snippet = substr($ocr, $start, SNIPPET_LENGTH);
-                        $snippet =~ s/\s/ /g;
+                        $snippet =~ s/\s+/ /g;
                     }
                 }
             }
