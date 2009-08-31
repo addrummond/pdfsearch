@@ -25,6 +25,13 @@
 [% END %]
 </tr>
 [% FOREACH result = results %]
+[% IF loop.index() == 100 %]
+<tr>
+<td class="nomoresnippets" colspan="5">
+...snippets displayed for first 100 results only...
+</td>
+</tr>
+[% END %]
 <tr>
 <td><small><a href="[% url_prefix | url %][% result.dir_url | url %]">[dir]</a></small>&nbsp;<a [% IF result.name != result.short_name %]title="[% HTML.escape(result.name) %]"[% END %] href="[% url_prefix | url %][% result.name | url %]">[% HTML.escape(result.short_name) %]</a>
 [% IF result.snippet_match %]
