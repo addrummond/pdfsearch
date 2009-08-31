@@ -99,7 +99,7 @@ for (my $i = 0;
                     close OCR;
                 };
                 if ((! $@) && $ocr) {
-                    if ($ocr =~ m/[^\w]$query_re[^\w]/i) {
+                    if ($ocr =~ /[^\w]$query_re[^\w]/i) {
                         $snippet_match = $&;
 
                         use integer; # Integer division.
@@ -108,8 +108,6 @@ for (my $i = 0;
                         my $middle = length($`) + length($&);
                         $snippet_begin = substr($ocr, $start, SNIPPET_LENGTH / 2);
                         $snippet_end = substr($ocr, $middle, SNIPPET_LENGTH / 2);
-                        #$snippet = substr($ocr, $start, SNIPPET_LENGTH);
-                        #$snippet =~ s/\s+/ /g;
                         $snippet_begin =~ s/\s+/ /g;
                         $snippet_end =~ s/\s+/ /g;
                         $snippet_match =~ s/\s+/ /g;
