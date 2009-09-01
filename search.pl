@@ -56,14 +56,17 @@ if ($qs_hash->{filenames_only}) {
     
     my $cmd = LOCATE_LOCATION . ' -d ' . LOCATE_DB_LOCATION . " \"$query\"";
     print STDERR "CMD $cmd\n";
-    my $rs = `$cmd` || die "Error running 'locate': $!";
-    my @lrs = grep { -f $_ && $_ =~ /.pdf$/ } split(/\n/, $rs);
-    my $pref = PATH_PREFIX_TO_STRIP_FROM_LOCATE_RESULTS;
-    for (@lrs) {
-        $_ =~ s/^$pref//;
-        chomp;
+    my $rs = `$cmd`;
+    #die "Error running 'locate': $!" if $? >> 8;
+    if ($rs != /^\s*$/) {
+        my @lrs = grep { -f $_ && $_ =~ /.pdf$/ } split(/\n/, $rs);
+        my $pref = PATH_PREFIX_TO_STRIP_FROM_LOCATE_RESULTS;
+        for (@lrs) {
+            $_ =~ s/^$pref//;
+            chomp;
+        }
+        $locateresults = \@lrs;
     }
-    $locateresults = \@lrs;
 }
 else {
     $results = $swish->query($query);

@@ -21,8 +21,10 @@ sub build_tree_ {
         return $tree;
     }
 
-    my @entries = glob(catfile($current, "*"));
-    foreach my $entry (@entries) {
+   opendir my $DIR, $current || die "Can't open $current: $!";
+   while (defined(my $entry = readdir($DIR))) {
+        next if (-l $entry); # Ignore symlinks (most especially ".."!)
+
         my ($vol, $dirs, $file) = splitpath($entry);
         if (-d $entry) {
             push @$tree, build_tree_([$file], $entry, $depth + 1);
@@ -50,13 +52,9 @@ sub build_tree {
         my $current_utime = $s1[9]; # Magic number...
         
         my @s2 = stat($cachefile);
-#        print STDERR $cachefile, "\n";
         my $cachefile_utime = $s2[9];
 
-#        print STDERR $cachefile_utime, " ", $current_utime, "\n\n";
         if ($cachefile_utime >= $current_utime) { # Yuck.
-#            print STDERR "USING CACHE\n";
-            
             local undef $/;
             open F, $cachefile;
             my $json = <F>;
@@ -68,7 +66,6 @@ sub build_tree {
     my $json = JSON::to_json(build_tree_([$current], $current, 0, $dirs_only));
     if (! -d $cachedir) {
         if (! mkdir $cachedir) { # Ignore any errors - we just won't make the cache.
-#            print STDERR "Shit!\n";
             return $json;
         }
     }
