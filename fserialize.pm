@@ -8,7 +8,7 @@ require Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
 use common;
 use JSON;
-use File::Spec::Functions qw( splitpath catfile );
+use File::Spec::Functions qw( splitpath catfile catdir );
 
 # Helper for build_tree.
 sub build_tree_ {
@@ -17,22 +17,26 @@ sub build_tree_ {
     my $depth = shift;
     my $dirs_only = shift;
 
+    print STDERR $current, "\n";
+
     if ($depth > MAX_FILE_BROWSER_DIR_DEPTH) {
         return $tree;
     }
 
    opendir my $DIR, $current || die "Can't open $current: $!";
-   while (defined(my $entry = readdir($DIR))) {
-        next if (-l $entry); # Ignore symlinks (most especially ".."!)
+   while (defined(my $e = readdir($DIR))) {
+        next if $e eq "." || $e eq "..";
+        my $entry = catdir($current, $e);
+        next if (-l $entry);
 
-        my ($vol, $dirs, $file) = splitpath($entry);
         if (-d $entry) {
-            push @$tree, build_tree_([$file], $entry, $depth + 1);
+            push @$tree, build_tree_([$e], $entry, $depth + 1);
         }
         elsif (-f $entry && (! $dirs_only)) {
-            push @$tree, $file;
+            push @$tree, $e;
         }
     }
+    closedir $DIR;
 
     return $tree;
 }

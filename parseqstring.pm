@@ -26,9 +26,14 @@ sub parse_qstring {
     for (my $i = 0; $i < length($qstring); ++$i) {
         my $c = substr($qstring,$i,1);
         if ($c eq '"' || $c eq "'") {
-            &$resetvs;
-            $inminus = 0 if $inquote;
-            $inquote = ! $inquote;
+            if ((! $inquote) || ($c eq $inquote)) {
+                &$resetvs;
+                $inminus = 0 if $inquote;
+                $inquote = $inquote ? 0 : $c;
+            }
+            else {
+                $currentword .= $c;
+            }
         }
         elsif ($c eq "-") {
             &$resetvs;
