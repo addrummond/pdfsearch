@@ -5,7 +5,7 @@
 <td class="searchbutton"><input type="submit" value="Search"></input></td>
 </tr>
 <tr>
-<td id="dnrmtd" class="meta cb" colspan="2"><input id="dnrm" type="checkbox" [% IF not meta %]checked="yes"[% END %] name="no_meta" value="1" />&nbsp;Do not retreive metadata
+<td class="meta cb" colspan="2"><input id="dnrm" type="checkbox" [% IF not meta %]checked="yes"[% END %] name="no_meta" value="1" /><span id="dnrmsp">&nbsp;Do not retreive metadata</span>
 </td>
 </tr>
 </table>
@@ -13,8 +13,8 @@
 <script type="text/javascript">
 /* <![CDATA[ */
 var cb = document.getElementById("dnrm");
-var td = document.getElementById("dnrmtd");
-td.onclick = function () {
+var sp= document.getElementById("dnrmsp");
+sp.onclick = function () {
     cb.checked = ! cb.checked; 
 }
 /* ]]> */
