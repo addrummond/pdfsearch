@@ -5,12 +5,14 @@
 <td class="searchbutton"><input type="submit" value="Search"></input></td>
 </tr>
 <tr>
-<td class="meta cb" colspan="2"><input id="dnrm" type="checkbox" [% IF not meta %]checked="yes"[% END %] name="no_meta" value="1" /><span id="dnrmsp">&nbsp;Do not retreive metadata</span>
-</td>
-</tr>
-<tr>
-<td class="meta cb" colspan="2"><input id="fno" type="checkbox" [% IF filenames_only %]checked="yes"[% END %] name="filenames_only" value="1" /><span id="fnosp">&nbsp;Search filenames only.</span>
-</td>
+<td class="meta cb" colspan="2">
+<table>
+<tr><td>
+<input id="dnrm" type="checkbox" [% IF not meta %]checked="yes"[% END %] name="no_meta" value="1" /><span id="dnrmsp">&nbsp;Do not retreive metadata</span>
+</td></tr>
+<tr><td class="meta cb" colspan="2"><input id="fno" type="checkbox" [% IF filenames_only %]checked="yes"[% END %] name="filenames_only" value="1" /><span id="fnosp">&nbsp;Search filenames only</span>
+</td></tr>
+</table>
 </tr>
 </table>
 </form>
