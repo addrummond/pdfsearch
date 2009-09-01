@@ -50,12 +50,56 @@ my $swish = SWISH::API->new(INDEX_FILE);
 $swish->abort_last_error
     if $swish->Error;
 
-my $results = $swish->query($query);
-my @rlist;
-for (my $i = 0;
-     (my $result = $results->next_result) && ($qs_hash->{no_meta} || $i < MAX_RESULTS_WHEN_GIVING_METADATA);
-     ++$i) {
-    my $name = $result->property('swishdocpath');
+my $locateresults;
+my $results;
+if ($qs_hash->{filenames_only}) {
+    
+    my $cmd = LOCATE_LOCATION . ' -d ' . LOCATE_DB_LOCATION . " \"$query\"";
+    print STDERR "CMD $cmd\n";
+    my $rs = `$cmd` || die "Error running 'locate': $!";
+    my @lrs = grep { -f $_ && $_ =~ /.pdf$/ } split(/\n/, $rs);
+    my $pref = PATH_PREFIX_TO_STRIP_FROM_LOCATE_RESULTS;
+    for (@lrs) {
+        $_ =~ s/^$pref//;
+        chomp;
+    }
+    $locateresults = \@lrs;
+}
+else {
+    $results = $swish->query($query);
+}
+
+# Ick.
+sub iter_over_filenames {
+    my $action = shift;
+    my @rlist;
+
+    if ($locateresults) {
+        my $i = 0;
+        foreach (@$locateresults) {
+            if ((! $qs_hash->{no_meta}) && ($i >= MAX_RESULTS_WHEN_GIVING_METADATA)) {
+                last;
+            }
+            &$action($i, \@rlist, $_);
+            ++$i;
+        }
+    }
+    else {
+        for (my $i = 0; 
+             (my $result = $results->next_result) && ($qs_hash->{no_meta} || $i < MAX_RESULTS_WHEN_GIVING_METADATA);
+             ++$i) {
+            &$action($i, \@rlist, $result->property('swishdocpath'));
+        }
+    }
+
+    return \@rlist;
+}
+
+sub result_loop {
+    my $i = shift;
+    my $rlistref = shift;
+    my $name = shift;
+
     $name =~ s/^\.\///;
     my $f = catfile(DOC_PATH_PREFIX, $name);
 
@@ -63,10 +107,10 @@ for (my $i = 0;
     my $title = "";
     my $author = "";
     my $subject = "";
-    #my $snippet = "";
     my $snippet_begin = "";
     my $snippet_end = "";
     my $snippet_match = "";
+
     if ($name && $name =~ /\.pdf$/ && (! $qs_hash->{no_meta})) {
         my $cachefilename = catfile(METADATA_CACHE_DIR, $name) . '.mdcache';
         my $ocrfilename = catfile(METADATA_CACHE_DIR, $name) . '.ocr';
@@ -120,9 +164,12 @@ for (my $i = 0;
     }
 
     my ($vol, $dir, $fname) = splitpath($name);
-    push @rlist, { 'url' => $f, 'name' => $name, 'short_name' => $qs_hash->{no_meta} ? $name : trunc($name), 'dir_url' => $dir, 'numpages' => $numpages, 'title' => $title, 'author' => $author, 'subject' => $subject, 'snippet_begin' => $snippet_begin, 'snippet_end' => $snippet_end, 'snippet_match' => $snippet_match };
+    push @$rlistref, { 'url' => $f, 'name' => $name, 'short_name' => $qs_hash->{no_meta} ? $name : trunc($name), 'dir_url' => $dir, 'numpages' => $numpages, 'title' => $title, 'author' => $author, 'subject' => $subject, 'snippet_begin' => $snippet_begin, 'snippet_end' => $snippet_end, 'snippet_match' => $snippet_match };
 }
+
+my $rlistref = iter_over_filenames(\&result_loop);
+
 print $cgi->header(-status => "200 OK", -type => 'text/html', -encoding => 'utf-8');
-$tt->process('results.html', { 'url_prefix' => URL_PREFIX, 'query_url' => QUERY_URL, 'results' => \@rlist, 'query' => $query, 'meta' => ($qs_hash->{no_meta} ? 0 : 1), 'subtitle' => "results for $query" }) || die $tt->error;
+$tt->process('results.html', { 'url_prefix' => URL_PREFIX, 'query_url' => QUERY_URL, 'results' => $rlistref, 'query' => $query, 'meta' => ($qs_hash->{no_meta} ? 0 : 1), 'filenames_only' => $qs_hash->{filenames_only}, 'subtitle' => "results for $query" }) || die $tt->error;
 
 }

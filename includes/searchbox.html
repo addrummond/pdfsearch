@@ -8,14 +8,21 @@
 <td class="meta cb" colspan="2"><input id="dnrm" type="checkbox" [% IF not meta %]checked="yes"[% END %] name="no_meta" value="1" /><span id="dnrmsp">&nbsp;Do not retreive metadata</span>
 </td>
 </tr>
+<tr>
+<td class="meta cb" colspan="2"><input id="fno" type="checkbox" [% IF filenames_only %]checked="yes"[% END %] name="filenames_only" value="1" /><span id="fnosp">&nbsp;Search filenames only.</span>
+</td>
+</tr>
 </table>
 </form>
 <script type="text/javascript">
 /* <![CDATA[ */
-var cb = document.getElementById("dnrm");
-var sp= document.getElementById("dnrmsp");
-sp.onclick = function () {
-    cb.checked = ! cb.checked; 
+var es = [ "dnrm", "fno" ];
+for (var i = 0; i < es.length; ++i) {
+    (function (cb, sp) {
+        sp.onclick = function () {
+            cb.checked = ! cb.checked; 
+        };
+    })(document.getElementById(es[i]), document.getElementById(es[i] + "sp"));
 }
 /* ]]> */
 </script>
