@@ -158,8 +158,12 @@ sub result_loop {
                         $snippet_begin = substr($ocr, $start, SNIPPET_LENGTH / 2);
                         $snippet_end = substr($ocr, $middle, SNIPPET_LENGTH / 2);
                         $snippet_begin =~ s/\s+/ /g;
+                        $snippet_begin .= substr($snippet_match, 0, 1);
                         $snippet_end =~ s/\s+/ /g;
-                        $snippet_match =~ s/\s+/ /g;
+                        $snippet_end = substr($snippet_match, -1, 1) . $snippet_end;
+                        $snippet_match =~ s/^.//; # Remove first char.
+                        $snippet_match =~ s/.$//; # Remove last char.
+                        $snippet_match =~ s/\s+/ /g; 
                     }
                 }
             }
