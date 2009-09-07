@@ -1,7 +1,10 @@
 [% USE HTML %]
 [% js_includes = [ "browser.js" ] %]
 [% subtitle = "browser" %]
+[% page_heading = "PDF Locker Browser" %]
 [% INCLUDE header.html %]
+
+<span id="path" class="[% IF path %][% HTML.escape(path) %][% ELSE %]/[% END %]"></span>
 
 <script type="text/javascript">
 var body = document.getElementsByTagName("body")[0];
@@ -13,13 +16,13 @@ if (xmlhttp) {
             if (xmlhttp.status == 200) {
                 // Success.
                 var tree = eval(xmlhttp.responseText);
-                body.appendChild(drawSingleLevel(tree));
+                body.appendChild(drawDir(document.getElementById("path").className, tree));
             }
         }
     }
 
-    xmlhttp.open("GET", "ajax_dirlist.pl", true);
-    xmlhttp.send("");
+    xmlhttp.open("GET", "ajax_dirlist.pl?dir=" + escape(document.getElementById("path").className), true);
+    xmlhttp.send(null);
 }
 </script>
 

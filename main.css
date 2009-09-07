@@ -10,9 +10,12 @@ a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 td.searchbutton { padding-left: 0.5em; }
 hr { border-top-color: grey; border-top-style: solid; border-top-width: 1px; border-bottom-style: none; border-left-style: none; border-right-style: none; margin-bottom: 2em; }
+li.linknode { list-style-type: none; padding-bottom: 0.5em; }
+li { list-style-image: none; }
 li.node { cursor: pointer; }
 li.file { list-style-type: circle; }
-li.dir { list-style-type: square; }
+li.dir { list-style-image: url("arrow.png"); }
+li.opendir { list-style-image: url("downarrow.png"); }
 td.meta { padding-top: 0.5em; }
 td.meta table { float: right; }
 small.snippet { color: grey }
