@@ -8,11 +8,12 @@ table.results td { padding-bottom: 0.5em; padding-top: 0.5em; padding-right: 2em
 table.results th { text-align: left; padding: 0; margin: 0; font-size: medium; font-weight: normal; font-style: italic }
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
+a.file { }
 td.searchbutton { padding-left: 0.5em; }
 hr { border-top-color: grey; border-top-style: solid; border-top-width: 1px; border-bottom-style: none; border-left-style: none; border-right-style: none; margin-bottom: 2em; }
-li.linknode { list-style-type: none; padding-bottom: 0.5em; }
 li { list-style-image: none; }
-li.node { cursor: pointer; }
+li.linknode { padding-bottom: 0.5em; }
+li.node { cursor: default; }
 li.file { list-style-type: circle; }
 li.dir { list-style-image: url("arrow.png"); }
 li.opendir { list-style-image: url("downarrow.png"); }
@@ -22,3 +23,6 @@ small.snippet { color: grey }
 small.snippet em { font-style: normal; font-weight: bold; color: black; }
 td.cb:hover { cursor: default; }
 td.nomoresnippets { font-size: small; text-align: center; color: red; }
+img.loading { }
+div.dircontainer { }
+a.diraction { color: red; }

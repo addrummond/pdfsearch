@@ -59,7 +59,7 @@ if ($qs_hash->{filenames_only}) {
     my $rs = `$cmd`;
     #die "Error running 'locate': $!" if $? >> 8;
     if ($rs != /^\s*$/) {
-        my @lrs = grep { -f $_ && $_ =~ /.pdf$/ } split(/\n/, $rs);
+        my @lrs = grep { -f $_ && $_ =~ /.pdf$/i } split(/\n/, $rs);
         my $pref = PATH_PREFIX_TO_STRIP_FROM_LOCATE_RESULTS;
         for (@lrs) {
             $_ =~ s/^$pref//;
@@ -114,7 +114,7 @@ sub result_loop {
     my $snippet_end = "";
     my $snippet_match = "";
 
-    if ($name && $name =~ /\.pdf$/ && (! $qs_hash->{no_meta})) {
+    if ($name && $name =~ /\.pdf$/i && (! $qs_hash->{no_meta})) {
         my $cachefilename = catfile(METADATA_CACHE_DIR, $name) . '.mdcache';
         my $ocrfilename = catfile(METADATA_CACHE_DIR, $name) . '.ocr';
       
