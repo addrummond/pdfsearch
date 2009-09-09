@@ -110,20 +110,29 @@ function drawDir(path, tree, url_prefix, embedded) {
     var div = document.createElement("div");
     div.className = "dircontainer";
 
+    function refresh () {
+        getDirJSON(path, function(json) {
+            var newdiv = drawDir(path, json, url_prefix, embedded);
+            div.parentNode.replaceChild(newdiv, div);
+        });
+    }
+
     if (embedded) { // Don't want to alllow uploading files to root dir.
         var a = document.createElement("a");
         a.href="";
         a.className = "diraction";
         a.innerHTML = "&raquo; upload a file to this folder.";
+        a.id = path + "\nupload";
 
-        a.id = path + "_upload";
-        addEventListener(a, 'click', function(e) {
-            var up = new AjaxUpload(path + "_upload", {action: "ajax_file_upload.pl"});
-
-            stop_event_propagating(e);
-            prevent_default(e);
-            return false;
-        }, false); // False for 'bubble'.
+        var up = new AjaxUpload(a, {
+            action: "ajax_file_upload.pl",
+            data: { dir: path },
+            autoSubmit: true,
+            responseType: false,
+            onComplete: function(file, response) {
+                setTimeout(function () { refresh(); }, 100);
+            }
+        });
 
         div.appendChild(a);
     }
