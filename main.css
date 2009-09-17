@@ -9,6 +9,7 @@ table.results th { text-align: left; padding: 0; margin: 0; font-size: medium; f
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 a.file { }
+a.highlighted { background: yellow; }
 td.searchbutton { padding-left: 0.5em; }
 hr { border-top-color: grey; border-top-style: solid; border-top-width: 1px; border-bottom-style: none; border-left-style: none; border-right-style: none; margin-bottom: 2em; }
 li { list-style-image: none; }

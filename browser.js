@@ -35,7 +35,7 @@ function getDirJSON(dir, callback) {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var r = eval(xmlhttp.responseText);
-            r.sort(function (x,y) { return x[1] > y[1]; });
+            r.sort(function (x,y) { return x[1].toUpperCase() > y[1].toUpperCase(); });
             callback(r)
         }
     }
@@ -99,7 +99,7 @@ function getNormalTextStringPxWidth(s)
     return w;
 }
 
-function drawDir(path, tree, url_prefix, embedded) {
+function drawDir(path, tree, url_prefix, embedded, highlight) {
     assert_is_arraylike(tree);
 
     g_openDirs[path] = true;
@@ -110,31 +110,63 @@ function drawDir(path, tree, url_prefix, embedded) {
     var div = document.createElement("div");
     div.className = "dircontainer";
 
-    function refresh () {
+    function refresh (highlight) {
         getDirJSON(path, function(json) {
-            var newdiv = drawDir(path, json, url_prefix, embedded);
+            var newdiv = drawDir(path, json, url_prefix, embedded, highlight);
             div.parentNode.replaceChild(newdiv, div);
         });
     }
 
-    if (embedded) { // Don't want to alllow uploading files to root dir.
+    if (embedded) { // Don't want to allow uploading files to root dir (of course this must be disallowed on server side also).
+        var upldiv = document.createElement("div");
         var a = document.createElement("a");
         a.href="";
         a.className = "diraction";
         a.innerHTML = "&raquo; upload a file to this folder.";
-        a.id = path + "\nupload";
+        upldiv.appendChild(a);
 
+        var intid;
+        var magic = new Date().getTime() + "";
         var up = new AjaxUpload(a, {
             action: "ajax_file_upload.pl",
-            data: { dir: path },
+            data: { "dir": path, "magic": magic},
             autoSubmit: true,
             responseType: false,
             onComplete: function(file, response) {
-                setTimeout(function () { refresh(); }, 100);
+                clearInterval(intid);
+                setTimeout(function () { refresh(file); }, 100);
+                if (upldiv.lastChild.tagName == "SPAN")
+                    upldiv.removeChild(upldiv.lastChild);
+            },
+            onSubmit: function(file, ext) {
+                intid = setInterval(function () {
+                    var xmlhttp = getXMLHttpRequest();
+                    var query = 'ajax_progress_check.pl?magic=' + escape(magic);
+                    xmlhttp.open('GET', query, true);
+                    var tries = 0;
+                    xmlhttp.onreadystatechange = function() {
+                        if (xmlhttp.readyState == 4) {
+                            if (xmlhttp.status == 200) {
+                                var pr = eval(xmlhttp.responseText);
+                                if (upldiv.childNodes.length == 1) {
+                                    var sp = document.createElement("span");
+                                    upldiv.appendChild(sp);
+                                }
+                                upldiv.lastChild.innerHTML = parseInt(((pr[0] + 0.0) / (pr[1] + 0.0)) * 100.0) + "%";
+                            }
+                            else { /*alert("ERROR: " + xmlhttp.responseText);*/ ++tries; }
+                            if (tries > 2)
+                                clearInterval(intid);
+                        } 
+                    }
+                    xmlhttp.send(null);
+
+                    return true; // Don't cancel upload.
+                }, 500);
             }
         });
 
-        div.appendChild(a);
+        div.appendChild(upldiv);
     }
 
     var ul = document.createElement("ul");
@@ -162,6 +194,9 @@ function drawDir(path, tree, url_prefix, embedded) {
             a.className = "file";
             a.href = full_url_prefix + tree[i][1];
             a.appendChild(document.createTextNode(tree[i][1]));
+            if (tree[i][1] == highlight) {
+                a.className += " highlighted";
+            }
             li.appendChild(a);
         }
         else {
