@@ -1,3 +1,31 @@
+// Taken from http://www.quirksmode.org/js/cookies.html
+function createCookie(name,value,days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime()+(days*24*60*60*1000));
+        var expires = "; expires="+date.toGMTString();
+    }
+    else var expires = "";
+    document.cookie = name+"="+value+expires+"; path=/";
+}
+
+// As above.
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+// As above.
+function eraseCookie(name) {
+    createCookie(name,"",-1);
+}
+
 // Cross-browser AJAX.
 function getXMLHttpRequest()
 {
@@ -35,7 +63,7 @@ function getDirJSON(dir, callback) {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var r = eval(xmlhttp.responseText);
-            r.sort(function (x,y) { return x[1].toUpperCase() > y[1].toUpperCase(); });
+            r.sort(function (x,y) { var a = x[1].toUpperCase(); var b = y[1].toUpperCase(); return (a===b) ? 0 : (a>b) ? 1 : -1; });
             callback(r)
         }
     }
@@ -103,12 +131,17 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
     assert_is_arraylike(tree);
 
     g_openDirs[path] = true;
+    // This will cause there to be some unnecessary writing of cookies, but shouldn't
+    // be an issue.
+    createCookie("openDirs", escape(JSON.stringify(g_openDirs)), 2); 
 
     // Guaranteed to end with '/'
     full_url_prefix = url_prefix + (url_prefix.match(/\/$/) ? "" : "/") + (path.match(/^\//) ? path.substr(1) : path) + (path.match(/\/$/) ? "" : "/");
 
     var div = document.createElement("div");
     div.className = "dircontainer";
+
+    var espan; // See below.
 
     function refresh (highlight) {
         getDirJSON(path, function(json) {
@@ -126,7 +159,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
         upldiv.appendChild(a);
 
         var intid;
-        var magic = new Date().getTime() + "";
+        var magic = new Date().getTime() + Math.random() + "";
         var up = new AjaxUpload(a, {
             action: "ajax_file_upload.pl",
             data: { "dir": path, "magic": magic},
@@ -134,11 +167,47 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
             responseType: false,
             onComplete: function(file, response) {
                 clearInterval(intid);
-                setTimeout(function () { refresh(file); }, 100);
-                if (upldiv.lastChild.tagName == "SPAN")
-                    upldiv.removeChild(upldiv.lastChild);
+                for (var i = 0; i < g_uploadTargetPaths.length; ++i) {
+                    if (g_uploadTargetPaths[i] == path) {
+                        g_uploadTargetPaths.splice(i, 1); // Remove the ith element.
+                        break;
+                    }
+                }
+
+                // Server sends a single newline if there was no error (this upload lib
+                // seems not to make available the actual response code, so we can't check
+                // for a 400).
+                if (response && response.length > 1) {
+                    // ERROR.
+                    while (upldiv.childNodes.length > 1) upldiv.removeChild(upldiv.lastChild);
+                    // Making it a table rather than a div because we don't want it splaying
+                    // out all over the page (and IE doesn't support the relevant CSS property,
+                    // of course).
+                    espan = document.createElement("table"); // This is defined higher up.
+                    var espantr = document.createElement("tr");
+                    var espantd = document.createElement("td");
+                    espan.appendChild(espantr);
+                    espantr.appendChild(espantd);
+                    espan.className = "uploaderror";
+                    response = response.replace(/\$FILENAME/, '\u2018' + file + '\u2019');
+                    espantd.appendChild(document.createTextNode(response));
+                    upldiv.appendChild(espan);
+                }
+                else {
+                    // FILE UPLOADED SUCCESSFULLY.
+                    setTimeout(function () { refresh(file); }, 100);
+                    if (upldiv.lastChild.tagName == "SPAN")
+                        upldiv.removeChild(upldiv.lastChild);
+                }
             },
             onSubmit: function(file, ext) {
+                g_uploadTargetPaths.push(path);
+
+                if (espan) {
+                    upldiv.removeChild(espan);
+                    espan = null;
+                }
+
                 intid = setInterval(function () {
                     var xmlhttp = getXMLHttpRequest();
                     var query = 'ajax_progress_check.pl?magic=' + escape(magic);
@@ -150,9 +219,10 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                                 var pr = eval(xmlhttp.responseText);
                                 if (upldiv.childNodes.length == 1) {
                                     var sp = document.createElement("span");
+                                    sp.className = "uploadprogress";
                                     upldiv.appendChild(sp);
                                 }
-                                upldiv.lastChild.innerHTML = parseInt(((pr[0] + 0.0) / (pr[1] + 0.0)) * 100.0) + "%";
+                                upldiv.lastChild.innerHTML = "&nbsp;&nbsp;" + parseInt(((pr[0] + 0.0) / (pr[1] + 0.0)) * 100.0) + "%";
                             }
                             else { /*alert("ERROR: " + xmlhttp.responseText);*/ ++tries; }
                             if (tries > 2)
@@ -172,18 +242,6 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
     var ul = document.createElement("ul");
     ul.className = "dirlist";
     div.appendChild(ul);
-
-    /*if (embedded) {
-        var li = document.createElement("li");
-        li.className = "linknode";
-        var a = document.createElement("a");
-        a.className = "linknode";
-        a.href = "";
-        a.innerHTML = "[open this folder]";
-        a.onclick = function () { alert("CLICK"); }
-        li.appendChild(a);
-        ul.appendChild(li);
-    }*/
 
     for (var i = 0; i < tree.length; ++i) {
         (function (li, subdir) {
@@ -233,6 +291,20 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                     openitup();
                 }
                 else {
+                    // Don't allow the user to close this branch if there's a file being uploaded inside it.
+                    var cantClose = false;
+                    for (var i = 0; i < g_uploadTargetPaths.length; ++i) {
+                        if (g_uploadTargetPaths[i].indexOf(path) == 0) {
+                            cantClose = true; 
+                            break;
+                        }
+                    }
+
+                    if (cantClose) {
+                        alert("You can't close this part of the tree because a file is being uploaded inside.");
+                    }
+                    else {
+
                     // The finicky bit -- we don't want the subtree to close wherever the user clicks within the
                     // li that isn't contained within a nested li (e.g. the blank space to the left). Unfortunately,
                     // we just have to look at the pixel position of the event to figure out whether or not this is
@@ -253,6 +325,8 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                             }
                         }
                     }
+
+                    }
                 }
 
                 // Prevent the event from propagating (cross browser).
@@ -269,3 +343,10 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
 
     return div;
 }
+
+if (readCookie("openDirs")) {
+    g_openDirs = JSON.parse(unescape(readCookie("openDirs")));
+}
+else { g_openDirs = { }; }
+g_uploadTargetPaths = [ ];
+

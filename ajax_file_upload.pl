@@ -16,7 +16,7 @@ local $/ = "\r\n";
 
 if (! $ENV{CONTENT_TYPE}) {
     print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
-    print "\n"; # No point in giving proper error for ajax.
+    print "Bad request.\n"; # No point in giving proper error for ajax.
     exit 0;
 }
 
@@ -24,7 +24,7 @@ my $boundary;
 $ENV{'CONTENT_TYPE'} =~ /multipart\/form-data; boundary=(--.*)/;
 if (! $1) {
     print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
-    print "\n"; # No point in giving proper error for a bad request.
+    print "Bad request\n"; # No point in giving proper error for a bad request.
     exit 0;
 }
 $boundary = $1;
@@ -82,8 +82,9 @@ while (defined(my $line = <>)) {
     }
     elsif ($state eq 'filecontents') {
         if (! ($parms{magic} && $parms{dir} && $parms{filename})) {
+            close(STDIN);
             print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
-            print "\n";
+            print "Bad request\n";
             exit 0;
         }
         else {
@@ -91,11 +92,21 @@ while (defined(my $line = <>)) {
                 # Check that the file doesn't already exist in the locker.
                 $final_filename = catfile(DOC_PATH_PREFIX, $parms{dir}, $parms{filename});
                 if (-f $final_filename) {
+                    close(STDIN);
                     print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
-                    print "\nThe file already exists.\n";
+                    print "The file \$FILENAME already exists.\n\n";
                     exit 0;
                 }
 
+                # Check that the directory is (a) not the root directory and (b) doesn't contain any ".."s.
+                # Note that this is still somewhat insecure since the locker could (in principle) contain
+                # symlinks to higher directories other than ".."
+                if ($parms{dir} =~ /\.\./ || $parms{dir} =~ /^(?:\\|\/)*$/) {
+                    close(STDIN);
+                    print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
+                    print "The directory to be uploaded to contained the forbidden string '..' or was the root directory.";
+                    exit 0;
+                }
             }
 
             # Stuff we do for every iteration of this state.

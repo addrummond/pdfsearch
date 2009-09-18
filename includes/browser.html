@@ -1,37 +1,22 @@
 [% USE HTML %]
 [% subtitle = "browser" %]
 [% page_heading = "PDF Locker Browser" %]
+[% js_includes = [ "json.js", "ajaxupload.3.5.js", "browser.js" ] %]
 [% INCLUDE header.html %]
+
+<div class="topinfo">
+<p><b>You can still browse the locker and upload files the <a href="http://files.ling.umd.edu/locker/">old way</a>.</b></p>
+</div>
 
 <span id="path" class="[% IF path %][% HTML.escape(path) %][% ELSE %]/[% END %]"></span>
 <span id="url_prefix" class="[% HTML.escape(url_prefix) %]"></span>
 
-<script type="text/javascript" src="ajaxupload.3.5.js"></script>
-<script type="text/javascript" src="browser.js"></script>
 <script type="text/javascript">
-g_openDirs = { };
-
 var body = document.getElementsByTagName("body")[0];
 
 getDirJSON(document.getElementById("path").className, function(tree) {
     body.appendChild(drawDir(document.getElementById("path").className, tree, document.getElementById("url_prefix").className));
 });
-
-/*var xmlhttp = getXMLHttpRequest();
-if (xmlhttp) {
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4) {
-            if (xmlhttp.status == 200) {
-                // Success.
-                var tree = eval(xmlhttp.responseText);
-                body.appendChild(drawDir(document.getElementById("path").className, tree, document.getElementById("url_prefix").className));
-            }
-        }
-    }
-
-    xmlhttp.open("GET", "ajax_dirlist.pl?dir=" + escape(document.getElementById("path").className), true);
-    xmlhttp.send(null);
-}*/
 </script>
 
 [% INCLUDE footer.html %]
