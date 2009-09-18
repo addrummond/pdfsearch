@@ -88,13 +88,13 @@ function prevent_default(e)
 }
 
 // Cross-browser fancy event adding (note that IE always uses bubbling, so no need to specify).
-function addEventListener(elem, name, func, capture)
+function listenToEvent(elem, name, func, capture)
 {
     if (elem.addEventListener) {
         return elem.addEventListener(name, func, capture);
     }
     else {
-        return elem.attachEvent(name, func);
+        return elem.attachEvent("on" + name, func);
     }
 }
 
@@ -284,7 +284,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
             li.open = g_openDirs[subdir];
             if (li.open) { openitup(); }
 
-            addEventListener(li, 'click', function(e) { // So we can specify event handling in the 'bubble' phase.
+            listenToEvent(li, 'click', function(e) { // So we can specify event handling in the 'bubble' phase.
                 if (li.locked) { return; }
 
                 if (! li.open) {
@@ -335,7 +335,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
         }
         else {
             // If it's a file, we just want to stop the event from propagating to the parent and closing it.
-            addEventListener(li, 'click', function(e) { stop_event_propagating(e); }, false); // False for 'bubble'.
+            listenToEvent(li, 'click', function(e) { stop_event_propagating(e); }, false); // False for 'bubble'.
         }
 
         })(document.createElement("li"), path + (path.match(/\/$/) ? '' : '/') + tree[i][1]);
