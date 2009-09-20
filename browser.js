@@ -150,6 +150,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
 
     if (embedded) { // Don't want to allow uploading files to root dir (of course this must be disallowed on server side also).
         var upldiv = document.createElement("div");
+        upldiv.className = "dirheader";
         var uploadlink = document.createElement("span");
         uploadlink.className = "diraction";
         uploadlink.innerHTML = "&raquo; upload a file to this folder.";
@@ -183,17 +184,14 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                 if (response && response.length > 1) {
                     // ERROR.
                     while (upldiv.childNodes.length > 1) upldiv.removeChild(upldiv.lastChild);
-                    // Making it a table rather than a div because we don't want it splaying
-                    // out all over the page (and IE doesn't support the relevant CSS property,
-                    // of course).
-                    espan = document.createElement("table"); // This is defined higher up.
-                    var espantr = document.createElement("tr");
-                    var espantd = document.createElement("td");
-                    espan.appendChild(espantr);
-                    espantr.appendChild(espantd);
+                    // We have to make it a span so that it doesn't go right across the page.
+                    // (Dynamically creating tables in IE 6 seems to cause problems.)
+                    // We just use a <br> to put the error message on a new line (ugly but it works).
+                    espan = document.createElement("span"); // This is defined higher up.
                     espan.className = "uploaderror";
                     response = response.replace(/\$FILENAME/, '\u2018' + file + '\u2019');
-                    espantd.appendChild(document.createTextNode(response));
+                    espan.appendChild(document.createElement("br"));
+                    espan.appendChild(document.createTextNode(response));
                     upldiv.appendChild(espan);
                 }
                 else {

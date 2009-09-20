@@ -2,6 +2,13 @@
 use warnings;
 use strict;
 
+#
+# NOTE: Since the form is not submitted using AJAX but an invisible <input> element,
+# not all browsers deal very well with being sent a non-200 OK response. So, errors
+# are sent using 200 OK. When upload is successful, a blank response is sent (rather
+# than a short plain text error message).
+#
+
 use common;
 use fserialize qw( list_dir );
 use File::Spec::Functions qw( splitpath catfile catdir );
@@ -15,7 +22,7 @@ use JSON;
 local $/ = "\r\n";
 
 if (! $ENV{CONTENT_TYPE}) {
-    print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
+    print header(-status => "200 OK", -type => 'text/html', -encoding => 'utf-8');
     print "Bad request.\n"; # No point in giving proper error for ajax.
     exit 0;
 }
@@ -23,7 +30,7 @@ if (! $ENV{CONTENT_TYPE}) {
 my $boundary;
 $ENV{'CONTENT_TYPE'} =~ /multipart\/form-data; boundary=(--.*)/;
 if (! $1) {
-    print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
+    print header(-status => "200 OK", -type => 'text/html', -encoding => 'utf-8');
     print "Bad request\n"; # No point in giving proper error for a bad request.
     exit 0;
 }
@@ -83,7 +90,7 @@ while (defined(my $line = <>)) {
     elsif ($state eq 'filecontents') {
         if (! ($parms{magic} && $parms{dir} && $parms{filename})) {
             close(STDIN);
-            print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
+            print header(-status => "200 OK", -type => 'text/html', -encoding => 'utf-8');
             print "Bad request\n";
             exit 0;
         }
@@ -92,13 +99,12 @@ while (defined(my $line = <>)) {
                 # Strip any path prefixes from the filename (I.E. likes to give these).
                 $parms{filename} =~ /([^\\\/]+)$/ || die "Major wtf: '$parms{filename}'";
                 $parms{filename} = $1;
-                print STDERR "FN: $parms{filename}";
 
                 # Check that the file doesn't already exist in the locker.
                 $final_filename = catfile(DOC_PATH_PREFIX, $parms{dir}, $parms{filename});
                 if (-f $final_filename) {
                     close(STDIN);
-                    print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
+                    print header(-status => "200 OK", -type => 'text/html', -encoding => 'utf-8');
                     print "The file \$FILENAME already exists.\n\n";
                     exit 0;
                 }
@@ -108,7 +114,7 @@ while (defined(my $line = <>)) {
                 # symlinks to higher directories other than ".."
                 if ($parms{dir} =~ /\.\./ || $parms{dir} =~ /^(?:\\|\/)*$/) {
                     close(STDIN);
-                    print header(-status => "400 Bad Request", -type => 'text/html', -encoding => 'utf-8');
+                    print header(-status => "200 OK", -type => 'text/html', -encoding => 'utf-8');
                     print "The directory to be uploaded to contained the forbidden string '..' or was the root directory.";
                     exit 0;
                 }
