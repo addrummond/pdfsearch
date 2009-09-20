@@ -102,27 +102,22 @@ var body = document.getElementsByTagName("body")[0];
 
 function getNormalTextPxHeight()
 {
-    var x = document.createElement("table");
     var x = document.createElement("div");
     x.style.visibility = "hidden";
     x.appendChild(document.createTextNode("AXpj"));
     body.appendChild(x);
-    var h = x.clientHeight;
+    var h = x.offsetHeight;
     body.removeChild(x);
     return h;
 }
 
 function getNormalTextStringPxWidth(s)
 {
-    var x = document.createElement("table");
-    var tr = document.createElement("tr");
-    var td = document.createElement("td");
-    x.appendChild(tr);
-    tr.appendChild(td);
+    var x = document.createElement("span");
     x.style.visibility = "hidden";
-    td.appendChild(document.createTextNode(s));
+    x.appendChild(document.createTextNode(s));
     body.appendChild(x);
-    var w = td.clientWidth;
+    var w = x.offsetWidth;
     body.removeChild(x);
     return w;
 }
@@ -309,12 +304,14 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                     // li that isn't contained within a nested li (e.g. the blank space to the left). Unfortunately,
                     // we just have to look at the pixel position of the event to figure out whether or not this is
                     // the case.
-                    var clickScreenX = getEvent(e).layerX || getEvent(e).offsetX;
+                    var clickScreenX = getEvent(e).layerX || getEvent(e).offsetX; // I.E. doesn't support layerX/Y.
                     var clickScreenY = getEvent(e).layerY || getEvent(e).offsetY;
                     var liScreenY = li.offsetTop;
                     var linktext = li.firstChild.nodeValue; // The text in the text node.
                     var liScreenX = li.offsetLeft;
+                    //alert(clickScreenX + ":" + clickScreenY + ", " + liScreenX + ":" + liScreenY + " - " + getNormalTextStringPxWidth(linktext));
                     if ((clickScreenY - liScreenY <= getNormalTextPxHeight()) && (clickScreenX < liScreenX + 25 + getNormalTextStringPxWidth(linktext))) {
+                        //alert("HERE!");
                         for (var j = 0; j < li.childNodes.length; ++j) {
                             if (li.childNodes[j].tagName == "DIV" && li.childNodes[j].className == "dircontainer") {
                                 li.removeChild(li.childNodes[j]);
