@@ -6,6 +6,7 @@ td { margin: 0; padding: 0; text-align: left; }
 tr { padding: 0; margin: 0; }
 table.results td { padding-bottom: 0.5em; padding-top: 0.5em; padding-right: 2em; border-top-style: solid; border-top-width: 1px; border-top-color: grey; }
 table.results th { text-align: left; padding: 0; margin: 0; font-size: medium; font-weight: normal; font-style: italic }
+ul.dirlist { cursor: default; }
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 a.file { }
@@ -14,7 +15,7 @@ td.searchbutton { padding-left: 0.5em; }
 hr { border-top-color: grey; border-top-style: solid; border-top-width: 1px; border-bottom-style: none; border-left-style: none; border-right-style: none; margin-bottom: 2em; }
 li { list-style-image: none; }
 li.linknode { padding-bottom: 0.5em; }
-li.node { cursor: default; }
+/*li.node { cursor: default; }*/
 li.file { list-style-type: circle; }
 li.dir { list-style-image: url("arrow.png"); }
 li.opendir { list-style-image: url("downarrow.png"); }
@@ -22,12 +23,11 @@ td.meta { padding-top: 0.5em; }
 td.meta table { float: right; }
 small.snippet { color: grey }
 small.snippet em { font-style: normal; font-weight: bold; color: black; }
-td.cb:hover { cursor: default; }
+/*td.cb:hover { cursor: default; }*/
 td.nomoresnippets { font-size: small; text-align: center; color: red; }
 img.loading { }
 div.dircontainer { }
-a.diraction { color: red; cursor: default; }
-a.diraction:hover { cursor: default; }
+.diraction { color: grey; text-decoration: none; }
 .uploaderror { background: #FF6600; }
 .topinfo { font-size: small; text-align: center; }
 .uploadprogress { font-weight: bold; }

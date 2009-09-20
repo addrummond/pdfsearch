@@ -236,7 +236,11 @@ Ajax_upload = AjaxUpload = function(button, options){
 		onSubmit: function(file, extension){},
 		// Fired when file upload is completed
 		// WARNING! DO NOT USE "FALSE" STRING AS A RESPONSE!
-		onComplete: function(file, response) {}
+		onComplete: function(file, response) {},
+
+                // ALEX ALEX ALEX
+                mouseOver: function () { },
+                mouseOut: function () { }
 	};
 
 	// Merge the users options with our defaults
@@ -284,7 +288,7 @@ AjaxUpload.prototype = {
 			,'height': '30px'
 			,'fontSize': '14px'								
 			,'opacity': 0
-			//,'cursor': 'pointer'
+			,'cursor': 'pointer' // UNCOMMENTED BY ALEX
 			,'display' : 'none'
 			,'zIndex' :  2147483583 //Max zIndex supported by Opera 9.0-9.2x 
 			// Strange, I expected 2147483647					
@@ -346,12 +350,14 @@ AjaxUpload.prototype = {
 					
 			if (self._parentDialog != d.body){
 				dialogOffset = getOffset(self._parentDialog);
-			}	
-		});
+		        }
+
+         	});
 		
 	
 		// we can't use mouseout on the button,
 		// because invisible input is over it
+                var upperthis = this;
 		addEvent(document, 'mousemove', function(e){
 			var input = self._input;			
 			if (!input || !over) return;
@@ -370,6 +376,8 @@ AjaxUpload.prototype = {
 				input.style.left = c.x - dialogOffset.left + 'px';
 				input.style.display = 'block';
 				addClass(self._button, 'hover');				
+                                // ALEX ALEX ALEX
+                                upperthis._settings.mouseOver(e);
 			} else {		
 				// mouse left the button
 				over = false;
@@ -377,6 +385,8 @@ AjaxUpload.prototype = {
 					input.style.display = 'none';
 				}
 				removeClass(self._button, 'hover');
+                                // ALEX ALEX ALEX
+                                upperthis._settings.mouseOut(e);
 			}			
 		});			
 			

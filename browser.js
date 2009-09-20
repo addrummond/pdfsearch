@@ -58,8 +58,11 @@ function assert_is_arraylike(expr, message) {
 
 function getDirJSON(dir, callback) {
     var xmlhttp = getXMLHttpRequest();
-    var query = 'ajax_dirlist.pl?dir=' + escape(dir);
-    xmlhttp.open('GET', query, true);
+    var parms = "dir=" + escape(dir);
+    xmlhttp.open('POST', "ajax_dirlist.pl", true); // Using POST because IE caches all GET requests (!)
+    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.setRequestHeader("Content-Length", parms.length);
+    xmlhttp.setRequestHeader("Connection", "close");
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var r = eval(xmlhttp.responseText);
@@ -67,7 +70,7 @@ function getDirJSON(dir, callback) {
             callback(r)
         }
     }
-    xmlhttp.send(null);
+    xmlhttp.send(parms);
 }
 
 // Cross-browser.
@@ -147,19 +150,24 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
 
     if (embedded) { // Don't want to allow uploading files to root dir (of course this must be disallowed on server side also).
         var upldiv = document.createElement("div");
-        var a = document.createElement("a");
-        a.href="";
-        a.className = "diraction";
-        a.innerHTML = "&raquo; upload a file to this folder.";
-        upldiv.appendChild(a);
+        var uploadlink = document.createElement("span");
+        uploadlink.className = "diraction";
+        uploadlink.innerHTML = "&raquo; upload a file to this folder.";
+        upldiv.appendChild(uploadlink);
 
         var intid;
         var magic = new Date().getTime() + Math.random() + "";
-        var up = new AjaxUpload(a, {
+        var up = new AjaxUpload(uploadlink, {
             action: "ajax_file_upload.pl",
             data: { "dir": path, "magic": magic},
             autoSubmit: true,
             responseType: false,
+            mouseOver: function (e) {
+                uploadlink.style.textDecoration = "underline";
+            },
+            mouseOut: function(e) {
+                uploadlink.style.textDecoration = "none";
+            },
             onComplete: function(file, response) {
                 clearInterval(intid);
                 for (var i = 0; i < g_uploadTargetPaths.length; ++i) {
@@ -205,8 +213,11 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
 
                 intid = setInterval(function () {
                     var xmlhttp = getXMLHttpRequest();
-                    var query = 'ajax_progress_check.pl?magic=' + escape(magic);
-                    xmlhttp.open('GET', query, true);
+                    var parms = 'magic=' + escape(magic);
+                    xmlhttp.open('POST', "ajax_progress_check.pl", true); // Using POST because IE caches all GET requests (!)
+                    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xmlhttp.setRequestHeader("Content-Length", parms.length);
+                    xmlhttp.setRequestHeader("Connection", "close");
                     var tries = 0;
                     xmlhttp.onreadystatechange = function() {
                         if (xmlhttp.readyState == 4) {
@@ -215,6 +226,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                                 if (upldiv.childNodes.length == 1) {
                                     var sp = document.createElement("span");
                                     sp.className = "uploadprogress";
+                                    sp.appendChild(document.createTextNode("0%"));
                                     upldiv.appendChild(sp);
                                 }
                                 upldiv.lastChild.innerHTML = "&nbsp;&nbsp;" + parseInt(((pr[0] + 0.0) / (pr[1] + 0.0)) * 100.0) + "%";
@@ -224,7 +236,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                                 clearInterval(intid);
                         } 
                     }
-                    xmlhttp.send(null);
+                    xmlhttp.send(parms);
 
                     return true; // Don't cancel upload.
                 }, 500);
