@@ -89,6 +89,11 @@ while (defined(my $line = <>)) {
         }
         else {
             if (! $final_filename) { # If this is our first time in this state.
+                # Strip any path prefixes from the filename (I.E. likes to give these).
+                $parms{filename} =~ /([^\\\/]+)$/ || die "Major wtf: '$parms{filename}'";
+                $parms{filename} = $1;
+                print STDERR "FN: $parms{filename}";
+
                 # Check that the file doesn't already exist in the locker.
                 $final_filename = catfile(DOC_PATH_PREFIX, $parms{dir}, $parms{filename});
                 if (-f $final_filename) {
