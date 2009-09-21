@@ -12,4 +12,10 @@
 
 <body>
 <h1 class="title">[% IF page_heading %][% HTML.escape(page_heading) %][% ELSE %]PDF Locker Search[% END %]</h1>
-<hr/>
+<div class="headerlinks">
+[% FOR link = header_links %]
+&raquo;<a href="[% link.1 %]">[% link.0 %]</a>[% IF ! loop.last %]&nbsp;|&nbsp;[% END %]
+[% END %]
+</div>
+
+<hr class="hhr" />

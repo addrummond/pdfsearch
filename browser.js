@@ -1,3 +1,10 @@
+function htmlEncode(str) {
+    var div = document.createElement('div');
+    var text = document.createTextNode(str);
+    div.appendChild(text);
+    return div.innerHTML;
+}
+
 // Taken from http://www.quirksmode.org/js/cookies.html
 function createCookie(name,value,days) {
     if (days) {
@@ -192,13 +199,15 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                     response = response.replace(/\$FILENAME/, '\u2018' + file + '\u2019');
                     espan.appendChild(document.createElement("br"));
                     espan.appendChild(document.createTextNode(response));
+                    upldiv.replaceChild(uploadlink, upldiv.firstChild);
                     upldiv.appendChild(espan);
                 }
                 else {
                     // FILE UPLOADED SUCCESSFULLY.
                     setTimeout(function () { refresh(file); }, 100);
-                    if (upldiv.lastChild.tagName == "SPAN")
-                        upldiv.removeChild(upldiv.lastChild);
+                    upldiv.replaceChild(uploadlink, upldiv.firstChild);
+                    //if (upldiv.lastChild.tagName == "SPAN")
+                    //    upldiv.removeChild(upldiv.lastChild);
                 }
             },
             onSubmit: function(file, ext) {
@@ -208,6 +217,11 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                     upldiv.removeChild(espan);
                     espan = null;
                 }
+
+                var sp = document.createElement("span");
+                sp.className = "uploadprogress";
+                sp.innerHTML = "&nbsp;&nbsp;...initiating upload...&nbsp;&nbsp;(" + htmlEncode(file) + ")";
+                upldiv.replaceChild(sp, uploadlink);
 
                 intid = setInterval(function () {
                     var xmlhttp = getXMLHttpRequest();
@@ -221,13 +235,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                         if (xmlhttp.readyState == 4) {
                             if (xmlhttp.status == 200) {
                                 var pr = eval(xmlhttp.responseText);
-                                if (upldiv.childNodes.length == 1) {
-                                    var sp = document.createElement("span");
-                                    sp.className = "uploadprogress";
-                                    sp.appendChild(document.createTextNode("0%"));
-                                    upldiv.appendChild(sp);
-                                }
-                                upldiv.lastChild.innerHTML = "&nbsp;&nbsp;" + parseInt(((pr[0] + 0.0) / (pr[1] + 0.0)) * 100.0) + "%";
+                                upldiv.lastChild.innerHTML = "&nbsp;&nbsp;" + parseInt(((pr[0] + 0.0) / (pr[1] + 0.0)) * 100.0) + "%&nbsp;&nbsp;(" + htmlEncode(file) + ")";
                             }
                             else { /*alert("ERROR: " + xmlhttp.responseText);*/ ++tries; }
                             if (tries > 2)
@@ -292,6 +300,17 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
             listenToEvent(li, 'click', function(e) { // So we can specify event handling in the 'bubble' phase.
                 if (li.locked) { return; }
 
+                // The finicky bit -- we don't want the subtree to open/close wherever the user clicks within the
+                // li that isn't contained within a nested li (e.g. the blank space to the left). Unfortunately,
+                // we just have to look at the pixel position of the event to figure out whether or not this is
+                // the case.
+                var clickScreenX = getEvent(e).layerX || getEvent(e).offsetX; // I.E. doesn't support layerX/Y.
+                var clickScreenY = getEvent(e).layerY || getEvent(e).offsetY;
+                var liScreenY = li.offsetTop;
+                var linktext = li.firstChild.nodeValue; // The text in the text node.
+                var liScreenX = li.offsetLeft;
+                if ((clickScreenY - liScreenY <= getNormalTextPxHeight()) && (clickScreenX < liScreenX + 25 + getNormalTextStringPxWidth(linktext))) {
+
                 if (! li.open) {
                     openitup();
                 }
@@ -309,32 +328,21 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                         alert("You can't close this part of the tree because a file is being uploaded inside.");
                     }
                     else {
-
-                    // The finicky bit -- we don't want the subtree to close wherever the user clicks within the
-                    // li that isn't contained within a nested li (e.g. the blank space to the left). Unfortunately,
-                    // we just have to look at the pixel position of the event to figure out whether or not this is
-                    // the case.
-                    var clickScreenX = getEvent(e).layerX || getEvent(e).offsetX; // I.E. doesn't support layerX/Y.
-                    var clickScreenY = getEvent(e).layerY || getEvent(e).offsetY;
-                    var liScreenY = li.offsetTop;
-                    var linktext = li.firstChild.nodeValue; // The text in the text node.
-                    var liScreenX = li.offsetLeft;
-                    //alert(clickScreenX + ":" + clickScreenY + ", " + liScreenX + ":" + liScreenY + " - " + getNormalTextStringPxWidth(linktext));
-                    if ((clickScreenY - liScreenY <= getNormalTextPxHeight()) && (clickScreenX < liScreenX + 25 + getNormalTextStringPxWidth(linktext))) {
-                        //alert("HERE!");
                         for (var j = 0; j < li.childNodes.length; ++j) {
                             if (li.childNodes[j].tagName == "DIV" && li.childNodes[j].className == "dircontainer") {
                                 li.removeChild(li.childNodes[j]);
                                 li.open = false;
-                                delete g_openDirs[subdir];
                                 li.className = "node dir";
                                 li.style.listStyleImage = "url('arrow.png')";
+
+                                delete g_openDirs[subdir];
+                                createCookie("openDirs", escape(JSON.stringify(g_openDirs)), 2);
                             }
                         }
                     }
-
-                    }
                 }
+
+                } // If the click was in the right area.
 
                 // Prevent the event from propagating (cross browser).
                 stop_event_propagating(e);

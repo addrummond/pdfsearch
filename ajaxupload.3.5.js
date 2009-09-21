@@ -412,6 +412,13 @@ AjaxUpload.prototype = {
 	 * Upload file without refreshing the page
 	 */
 	submit : function(){
+                // ALEX ALEX ALEX.
+                if (this.CURRENTLY_SUBMITTING) {
+                    alert("You can only upload one file at a time within a single folder.");
+                    return;
+                }
+                this.CURRENTLY_SUBMITTING = true;
+
 		var self = this, settings = this._settings;	
 					
 		if (this._input.value === ''){
@@ -441,7 +448,7 @@ AjaxUpload.prototype = {
 			this._createInput();
 			
 			var toDeleteFlag = false;
-			
+		        var upperthis = this; // ALEX ALEX ALEX
 			addEvent(iframe, 'load', function(e){
 				if (// For Safari
 					iframe.src == "javascript:'%3Chtml%3E%3C/html%3E';" ||
@@ -514,6 +521,8 @@ AjaxUpload.prototype = {
 				
 				// Fix IE mixed content issue
 				iframe.src = "javascript:'<html></html>';";		 								
+
+                                upperthis.CURRENTLY_SUBMITTING = false;
 			});
 	
 		} else {
