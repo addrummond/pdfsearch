@@ -132,6 +132,11 @@ function getNormalTextStringPxWidth(s)
     return w;
 }
 
+function epochToHuman(t)
+{
+    return new Date(t * 1000).toLocaleString();
+}
+
 function drawDir(path, tree, url_prefix, embedded, highlight) {
     assert_is_arraylike(tree);
 
@@ -150,7 +155,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
 
     function refresh (highlight) {
         getDirJSON(path, function(json) {
-            var newdiv = drawDir(path, json, url_prefix, embedded, highlight);
+            var newdiv = drawDir(path, json, url_prefix, embedded, highlight).div;
             div.parentNode.replaceChild(newdiv, div);
         });
     }
@@ -259,6 +264,10 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
     for (var i = 0; i < tree.length; ++i) {
         (function (li, subdir) {
 
+        // Add size and modified/created info when user hovers over li.
+        // CURRENTLY NOT DISPLAYING MOD/CREAT AS IT'S NOT VERY USEFUL.
+        li.title = (tree[i][0] ? "" : (tree[i][2] / (1024*1024.0)).toFixed(1) + " MB"); /* + "Created: " + epochToHuman(tree[i][3]) + "; Modified: " + epochToHuman(tree[i][4]);*/
+
         ul.appendChild(li);
         if (! tree[i][0]) { // If it's a file.
             var a = document.createElement("a");
@@ -283,7 +292,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
 
                  li.style.listStyleImage = "url('ajax-loader.gif')";
                  getDirJSON(subdir, function (json) {
-                     var nul = drawDir(subdir, json, url_prefix, true);
+                     var nul = drawDir(subdir, json, url_prefix, true).div;
                      li.open = true;
                      li.appendChild(nul);
                      li.className = "node opendir";
@@ -356,7 +365,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
         })(document.createElement("li"), path + (path.match(/\/$/) ? '' : '/') + tree[i][1]);
     }
 
-    return div;
+    return { div: div };
 }
 
 if (readCookie("openDirs")) {
