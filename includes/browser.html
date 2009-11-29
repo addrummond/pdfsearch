@@ -5,12 +5,9 @@
 [% header_links = [ [ "search", "search.pl" ] ] %]
 [% INCLUDE header.html %]
 
-<div id="topinfo">
-<p><b>You can still browse the locker and upload files the <a href="http://files.ling.umd.edu/locker/">old way</a>.</b></p>
-</div>
-
 <span id="path" class="[% IF path %][% HTML.escape(path) %][% ELSE %]/[% END %]"></span>
 <span id="url_prefix" class="[% HTML.escape(url_prefix) %]"></span>
+<span id="dir_browse_url_prefix" class="[% HTML.escape(dir_browse_url_prefix) %]"></span>
 
 <script type="text/javascript">
 var body = document.getElementsByTagName("body")[0];
@@ -33,7 +30,7 @@ getDirJSON(document.getElementById("path").className, function(tree) {
     }
     actions.appendChild(closeall);
     rmenu.appendChild(actions);
-    var toppos = document.getElementById("topinfo").offsetTop;
+    var toppos = r.div.offsetTop;
     rmenu.style.top = toppos + "px";
     body.appendChild(rmenu);
 });

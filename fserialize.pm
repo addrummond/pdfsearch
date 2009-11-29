@@ -16,11 +16,11 @@ sub list_dir {
     opendir my $DIR, $dir || return 0;
     my @entries;
     while (defined(my $e = readdir($DIR))) {
-        next if $e =~ /^\./;
+        next if $e =~ /^\./ || $e eq ":2eDS_Store";
         my $fn = catfile($dir, $e);
-        my $size = stat($fn)->size || die "Error stat'ing file.";
-        my $created = stat($fn)->ctime || die "Error stat'ing file.";
-        my $modified = stat($fn)->mtime || die "Error stat'ing file.";
+        my $size = stat($fn)->size || 0;
+        my $created = stat($fn)->ctime || 0;
+        my $modified = stat($fn)->mtime || 0;
         # 1 = dir, 0 = file.
         push @entries, [ -d $fn ? 1 : 0, $e, $size, $created, $modified ];
     }

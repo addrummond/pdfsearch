@@ -1,4 +1,5 @@
 [% USE HTML %]
+[% header_links = [ [ "browse", "browser.pl" ] ] %]
 [% INCLUDE header.html %]
 
 [% INCLUDE searchbox.html %]
@@ -33,7 +34,7 @@
 </tr>
 [% END %]
 <tr>
-<td><small><a href="[% url_prefix | url %][% result.dir_url | url | html_entity %]">[dir]</a></small>&nbsp;<a [% IF result.name != result.short_name %]title="[% HTML.escape(result.name) %]"[% END %] href="[% url_prefix | url | html_entity %][% result.name | url | html_entity %]">[% HTML.escape(result.short_name) %]</a>
+<td><small><a href="[% dir_browse_url_prefix | url %][% result.dir_url | url | html_entity %]">[dir]</a></small>&nbsp;<a [% IF result.name != result.short_name %]title="[% HTML.escape(result.name) %]"[% END %] href="[% url_prefix | url | html_entity %][% result.name | url | html_entity %]">[% HTML.escape(result.short_name) %]</a>
 [% IF result.snippet_match %]
 <br/>
 <small class="snippet">

@@ -1,3 +1,5 @@
+var LI_PADDING_BOTTOM_PX = 4;
+
 function htmlEncode(str) {
     var div = document.createElement('div');
     var text = document.createTextNode(str);
@@ -160,9 +162,32 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
         });
     }
 
+    // Add a link for browsing the parent directory if path is not "/" AND this is not embedded.
+    if ((! embedded) && path && (! path.match(/^\/+$/))) {
+        var m = /([^\/]+)(\/?)$/.exec(path);
+        if (m) {
+            var parentdir = path.substring(0, path.length - m[1].length - m[2].length - 1);
+            var a = document.createElement("a");
+            a.href = document.getElementById("dir_browse_url_prefix").className + escape(parentdir);
+            a.className = "parentlink";
+            a.innerHTML = "&uarr; parent dir:&nbsp;";
+
+            var opdir;
+            if ((! parentdir) || parentdir.match(/^\/+$/)) opdir = "[root]";
+            else if (! parentdir.match(/^\//)) opdir = "/" + parentdir;
+            var dn = document.createElement("span");
+            dn.className = "parentlink";
+            dn.appendChild(document.createTextNode(opdir));
+            div.appendChild(a);
+            a.appendChild(dn);
+        }
+    }
+
     if (embedded) { // Don't want to allow uploading files to root dir (of course this must be disallowed on server side also).
         var upldiv = document.createElement("div");
         upldiv.className = "dirheader";
+        upldiv.style.paddingTop = LI_PADDING_BOTTOM_PX + "px";
+        upldiv.style.paddingBottom = LI_PADDING_BOTTOM_PX + 1 + "px";
         var uploadlink = document.createElement("span");
         uploadlink.className = "diraction";
         uploadlink.innerHTML = "&raquo; upload a file to this folder.";
@@ -283,6 +308,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
             li.appendChild(document.createTextNode(tree[i][1]));
         }
         li.className = "node " + (tree[i][0] ? "dir" : "file");
+        li.style.paddingBottom = LI_PADDING_BOTTOM_PX + "px";
 
         li.locked = false; // Ingore clicks while this is true (e.g. during loading).
 
@@ -318,7 +344,7 @@ function drawDir(path, tree, url_prefix, embedded, highlight) {
                 var liScreenY = li.offsetTop;
                 var linktext = li.firstChild.nodeValue; // The text in the text node.
                 var liScreenX = li.offsetLeft;
-                if ((clickScreenY - liScreenY <= getNormalTextPxHeight()) && (clickScreenX < liScreenX + 25 + getNormalTextStringPxWidth(linktext))) {
+                if ((clickScreenY - liScreenY <= getNormalTextPxHeight() + (LI_PADDING_BOTTOM_PX/2)) && (clickScreenX < liScreenX + 25 + getNormalTextStringPxWidth(linktext))) {
 
                 if (! li.open) {
                     openitup();

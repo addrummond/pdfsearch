@@ -1,5 +1,5 @@
-body { margin-left: 1em; margin-right: 1em; font-size: medium; font-family: serif; }
-h1.title { font-size: medium; font-weight: bold; }
+body { margin-left: 1em; margin-right: 1em; font-size: medium; font-family: "Palatino", "Times New Roman", serif; }
+h1.title { font-size: medium; font-weight: bold; clear: none; }
 h2 { font-size: medium; font-weight: bold; }
 table { margin: 0; padding: 0; border-collapse: collapse; }
 td { margin: 0; padding: 0; text-align: left; }
@@ -28,16 +28,22 @@ td.nomoresnippets { font-size: small; text-align: center; color: red; }
 img.loading { }
 div.dircontainer { }
 .diraction { color: #868686; text-decoration: none; font-weight: bold; font-family: sans-serif; font-size: small; }
-div.dirheader { padding-bottom: 0.25em; }
+div.dirheader { }
 .uploaderror { background: #FF6600; }
-#topinfo { font-size: small; text-align: center; }
 .uploadprogress { font-weight: bold; font-family: sans-serif; font-size: small; }
-div.headerlinks { float: right; font-size: small; font-family: sans-serif; padding-bottom: 0.25em; }
+div.headerlinks { font-size: small; font-family: sans-serif; padding-bottom: 0.25em; clear: none; }
 div.headerlinks a { text-decoration: none; color: black; font-weight: bold; }
 div.headerlinks a:hover { text-decoration: underline; }
 div.headerlinks a:visited { color: black; }
+div.headerlinksright { float: right; }
+div.headerlinksleft { float: left; }
 hr.hhr { clear: both; }
 div.rightmenu { position: fixed; right: 1em; top: 50px; background: #CC66FF; }
 div.rightmenu li { list-style: none; font-size: small; font-weight: bold; font-family: sans-serif; text-decoration: none; cursor: pointer; }
 div.rightmenu li:hover { text-decoration: underline; }
 div.rightmenu ul { margin-top: 0.25em; margin-bottom: 0.25em; margin-left: 0.25em; margin-right: 0.25em; padding: 0; }
+a.oldway { color: black; font-weight: bold; text-decoration: none; }
+a.oldway:visited { color: black; }
+a.parentlink { color: #868686; font-weight: bold; font-family: sans-serif; font-size: small; }
+span.parentlink { color: #868686; font-weight: normal; font-family: sans-serif; font-size: small; text-decoration: none; }
+

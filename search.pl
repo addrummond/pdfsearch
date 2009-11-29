@@ -53,7 +53,7 @@ $swish->abort_last_error
 my $locateresults;
 my $results;
 if ($qs_hash->{filenames_only}) {
-    
+    $query =~ s/"|[[:cntrl:]]|\r|\n|\l|\f//g; # Crude security mechanism (prevent code injection).
     my $cmd = LOCATE_LOCATION . ' -d ' . LOCATE_DB_LOCATION . " \"$query\"";
     print STDERR "CMD $cmd\n";
     my $rs = `$cmd`;
@@ -177,6 +177,6 @@ sub result_loop {
 my $rlistref = iter_over_filenames(\&result_loop);
 
 print $cgi->header(-status => "200 OK", -type => 'text/html', -encoding => 'utf-8');
-$tt->process('results.html', { 'url_prefix' => URL_PREFIX, 'query_url' => QUERY_URL, 'results' => $rlistref, 'query' => $query, 'meta' => ($qs_hash->{no_meta} ? 0 : 1), 'filenames_only' => $qs_hash->{filenames_only}, 'subtitle' => "results for $query" }) || die $tt->error;
+$tt->process('results.html', { 'url_prefix' => URL_PREFIX, 'dir_browse_url_prefix' => DIR_BROWSE_URL_PREFIX, 'query_url' => QUERY_URL, 'results' => $rlistref, 'query' => $query, 'meta' => ($qs_hash->{no_meta} ? 0 : 1), 'filenames_only' => $qs_hash->{filenames_only}, 'subtitle' => "results for $query" }) || die $tt->error;
 
 }
