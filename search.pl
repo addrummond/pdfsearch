@@ -46,6 +46,12 @@ my $query = $qs_hash->{query};
 my $query_strings = parse_qstring($query) if $query;
 my $query_re = re_for_strings($query_strings) if $query;
 
+# Keep a record of the search string.
+open my $search_record_file, ">>" . SEARCH_RECORD_FILE;
+if (! $@) {
+    print $search_record_file "$query\n";
+}
+
 my $swish = SWISH::API->new(INDEX_FILE);
 $swish->abort_last_error
     if $swish->Error;
